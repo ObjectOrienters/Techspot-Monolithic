@@ -35,7 +35,7 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import moment from 'moment';
 import EditPost from './EditPost';
 import DeletePost from './DeletePost';
-import { CommentsContext } from './Comments/CommentsContext';
+import {grey} from "@mui/material/colors";
 
 const Post = forwardRef(({ post, sharedPost }, ref) => {
     const [profilePicUrl, setProfilePicUrl] = useState(null);
@@ -58,7 +58,6 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const { isOpen: isOpenComment, onOpen: onOpenComment, onClose: onCloseComment } = useDisclosure();
 
-    const { setPostId } = useContext(CommentsContext);
 
     const fetchReactors = async (postId, reactionType) => {
         try {
@@ -180,10 +179,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
         }
     };
 
-    const openViewDetails = () => {
-        setPostId()
-        onOpen();
-    };
+
 
 
 
@@ -234,7 +230,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                 </CardHeader>
                 <CardBody textAlign={'left'}>
                     <Markdown
-                    
+
                         remarkPlugins={[remarkGfm]}
                         className="markdown"
                         children={post.textData}
@@ -322,7 +318,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                         {/* <Tabs>
                         <TabList>
                             <Tab>Comments</Tab>
-                            
+
 
                         </TabList>
 
@@ -330,12 +326,12 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                             <TabPanel>
                                 <Box overflowY="auto"> <Comments currentUserId="1"/></Box>
                             </TabPanel>
-                            
+
                         </TabPanels>
                     </Tabs> */}
                     {/* </DrawerBody>
                 </DrawerContent>
-            </Drawer> */} 
+            </Drawer> */}
 
             <Drawer placement='right' onClose={onSecondDrawerClose} isOpen={isSecondDrawerOpen} size='xs'>
                 <DrawerOverlay />
@@ -396,10 +392,10 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
 
             <Modal isOpen={isOpenComment} onClose={onCloseComment} isCentered>
                 <ModalOverlay />
-                <ModalContent maxW="32vw">
+                <ModalContent >
                     <ModalCloseButton mr={'-10px'} mt={'2px'} />
-                    <ModalBody m={"10px"}>
-                        <CommentForm post={post}></CommentForm>
+                    <ModalBody >
+                        <CommentForm content={post}></CommentForm>
                     </ModalBody>
                 </ModalContent>
             </Modal>

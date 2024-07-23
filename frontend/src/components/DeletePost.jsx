@@ -2,13 +2,13 @@ import React from 'react';
 import {
     Button, Flex, useToast, Text, Card,
     CardBody,
- 
+
 } from '@chakra-ui/react';
 import { useAuth } from './AuthProvider';
 import ApiCalls from './ApiCalls';
 
 
-function DeletePost({ post }) { 
+function DeletePost({ post }) {
 
     const { user, token } = useAuth();
     const toast = useToast();
@@ -17,6 +17,8 @@ function DeletePost({ post }) {
 
     const deletePost = async () => {
         try {
+
+            console.log("**************************************",`/profiles/${user}/posts/${post.contentID}`)
             const response = await ApiCalls.delete(`/profiles/${user}/posts/${post.contentID}`);
             toast({
                 title: 'Deleted Successfully.',
@@ -27,6 +29,7 @@ function DeletePost({ post }) {
                 position: `top`
             });
         } catch (error) {
+            console.log(error)
             toast({
                 title: 'Error Deleting Post.',
                 status: 'error',
@@ -44,7 +47,7 @@ function DeletePost({ post }) {
             <CardBody>
                 <Text>Are you sure you want to delete?</Text>
             <Flex justifyContent="flex-end" width="100%">
-                    <Button onClick={() => deletePost()} bg={'red'} color={'white'}>
+                    <Button onClick={deletePost} bg={'red'} color={'white'}>
                         Delete Post
                     </Button>
                 </Flex>
