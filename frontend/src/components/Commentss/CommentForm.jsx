@@ -11,7 +11,7 @@ import Comment from "../Commentss/Comment";
 import ApiCalls from '../ApiCalls';
 import {useAuth} from '../AuthProvider';
 
-export default function CommentForm({content}) {
+export default function CommentForm({content, setCommentsCount}) {
     const [comments, setComments] = useState([]);
     const [text, setText] = useState('');
     const [isEditMode, setEditMode] = useState(false);
@@ -46,6 +46,7 @@ export default function CommentForm({content}) {
             formData.append('commenter', user);
             const response = await ApiCalls.post(content._links.comments.href, formData);
             const data = response.data;
+            setCommentsCount((prev) => prev + 1);
             console.log("data from frontend" + data);
             setComments([...comments, data]);
             setText("");
@@ -111,6 +112,7 @@ export default function CommentForm({content}) {
             const data = response.data;
             const updatedComments = comments.filter(c => c.contentID !== comment.contentID);
             setComments(updatedComments);
+            setCommentsCount((prev) => prev - 1);
             toast({
                 title: 'Comment Deleted Successfully!',
                 description: "Comment Deleted.",

@@ -41,8 +41,8 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const [profilePicUrl, setProfilePicUrl] = useState(null);
     const { profile } = useParams();
     const navigate = useNavigate();
-    const [isReacted, setIsReacted] = useState(false);
     const { user, token } = useAuth();
+    const [isReacted, setIsReacted] = useState(false);
     const [reaction, setReaction] = useState('like');
     const [reactionCount, setReactionCount] = useState(post.numOfReactions);
     const [commentsCount, setCommentsCount] = useState(post.numOfComments);
@@ -299,75 +299,14 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                             }}
                         />
                     </Popup>
-                    <Button onClick={onOpenComment} flex='1' variant='ghost' leftIcon={<BiChat />}>
-                        <Box as="span" mr="2">{commentsCount}</Box> Comment
+                    <Button onClick={onOpenComment} flex='1' variant='ghost' leftIcon={<BiChat />}><Box as="span" mr="2">{commentsCount}</Box>
+                        Comment
                     </Button>
                     <Button flex='1' variant='ghost' leftIcon={<BiShare />} onClick={onOpenY}>
                         Share
                     </Button>
                 </CardFooter>
             </Card>
-
-            {/* <Drawer placement={'right'} onClose={onClose} isOpen={isOpen} size={'md'}>
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerHeader>Post Comments</DrawerHeader>
-                    <DrawerBody>
-                        <Divider borderColor="black.50" />
-                        <Box overflowY="auto"> <CommentForm post = {post}/></Box>
-                        {/* <Tabs>
-                        <TabList>
-                            <Tab>Comments</Tab>
-
-
-                        </TabList>
-
-                        <TabPanels>
-                            <TabPanel>
-                                <Box overflowY="auto"> <Comments currentUserId="1"/></Box>
-                            </TabPanel>
-
-                        </TabPanels>
-                    </Tabs> */}
-                    {/* </DrawerBody>
-                </DrawerContent>
-            </Drawer> */}
-
-            <Drawer placement='right' onClose={onSecondDrawerClose} isOpen={isSecondDrawerOpen} size='xs'>
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerHeader>Post Reactions</DrawerHeader>
-                    <DrawerBody>
-                        <Tabs>
-                            <TabList>
-                                <Tab><div>👍</div></Tab>
-                                <Tab><div>👎</div></Tab>
-                                <Tab><div>❤️</div></Tab>
-                                <Tab><div>👏</div></Tab>
-                                <Tab><div>😄</div></Tab>
-                            </TabList>
-
-                            <Box flex="1" overflowY="auto">
-                                <TabPanels>
-                                    <TabPanel>
-                                        <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
-                                            <Avatar name={post.contentAuthor?.name} src={profilePicUrl || undefined} />
-                                            <Box alignItems="left">
-                                                <Heading size='sm' textAlign={['left']}>{toProperCase(post.contentAuthor?.name)}</Heading>
-                                            </Box>
-                                        </Flex>
-                                    </TabPanel>
-                                    <TabPanel><p>Content for dislike reactions</p></TabPanel>
-                                    <TabPanel><p>Content for love reactions</p></TabPanel>
-                                    <TabPanel><p>Content for support reactions</p></TabPanel>
-                                    <TabPanel><p>Content for haha reactions</p></TabPanel>
-                                </TabPanels>
-                            </Box>
-                        </Tabs>
-                    </DrawerBody>
-                </DrawerContent>
-            </Drawer>
-
             <Modal isOpen={isOpenY} onClose={onCloseY} isCentered>
                 <ModalOverlay />
                 <ModalContent maxW="32vw">
@@ -395,7 +334,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                 <ModalContent >
                     <ModalCloseButton mr={'-10px'} mt={'2px'} />
                     <ModalBody >
-                        <CommentForm content={post}></CommentForm>
+                        <CommentForm content={post} setCommentsCount={setCommentsCount}></CommentForm>
                     </ModalBody>
                 </ModalContent>
             </Modal>
