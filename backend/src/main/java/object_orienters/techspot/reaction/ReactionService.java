@@ -65,7 +65,7 @@ public class ReactionService {
     }
 
     public Reaction createReaction(String reactorID, String reactionType, Long contentId) {
-
+        logger.info("**********************************************************************************, HELLO WORLD");
         Reaction.ReactionType reactionTypeEnum = Reaction.ReactionType.valueOf(reactionType);
 
         Profile reactor = profileRepository.findById(reactorID)
@@ -81,6 +81,8 @@ public class ReactionService {
                     reaction.setTimestamp(new Timestamp(System.currentTimeMillis()));
                     reaction.setReactionID(reactor.getUsername() + content.getContentID());
                     createdReaction.set(reaction);
+                    content.setNumOfReactions(content.getNumOfReactions() + 1);
+                    logger.info("####################################################"+"Angela");
 
                 }, () -> {
                     Reaction newReaction = new Reaction(reactor, reactionTypeEnum, content);
@@ -88,11 +90,14 @@ public class ReactionService {
                     newReaction.setReactionID(reactor.getUsername() + content.getContentID());
                     content.getReactions().add(newReaction);
                     content.setNumOfReactions(content.getNumOfReactions() + 1);
-                    contentRepository.save(content);
+                    logger.info("####################################################1"+content.getNumOfReactions() + 1);
                     createdReaction.set(newReaction);
                 });
-
-        return reactionRepository.save(createdReaction.get());
+        logger.info("####################################################2"+content.getNumOfReactions() + 1);
+        contentRepository.save(content);
+        System.out.println(createdReaction.get().getReactionID());
+        reactionRepository.save(createdReaction.get());
+        return createdReaction.get();
 
     }
 
