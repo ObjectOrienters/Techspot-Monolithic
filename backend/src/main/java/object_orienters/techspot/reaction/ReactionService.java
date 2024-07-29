@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import object_orienters.techspot.content.ReactableContent;
 import object_orienters.techspot.content.ReactableContentRepository;
 import object_orienters.techspot.exceptions.ContentNotFoundException;
+import object_orienters.techspot.exceptions.ReactionAlreadyExistsException;
 import object_orienters.techspot.exceptions.ReactionNotFoundException;
 import object_orienters.techspot.exceptions.UserNotFoundException;
 import object_orienters.techspot.profile.Profile;
@@ -65,7 +66,6 @@ public class ReactionService {
     }
 
     public Reaction createReaction(String reactorID, String reactionType, Long contentId) {
-        logger.info("**********************************************************************************, HELLO WORLD");
         Reaction.ReactionType reactionTypeEnum = Reaction.ReactionType.valueOf(reactionType);
 
         Profile reactor = profileRepository.findById(reactorID)
@@ -73,33 +73,26 @@ public class ReactionService {
 
         ReactableContent content = contentRepository.findByContentID(contentId)
                 .orElseThrow(() -> new ContentNotFoundException(contentId));
-        AtomicReference<Reaction> createdReaction = new AtomicReference<>();
-        content.getReactions().stream()
+
+        Optional<Reaction> existingReaction = content.getReactions().stream()
                 .filter(reaction -> reaction.getReactor().getUsername().equals(reactor.getUsername()))
-                .findFirst().ifPresentOrElse(reaction -> {
-                    reaction.setType(reactionTypeEnum);
-                    reaction.setTimestamp(new Timestamp(System.currentTimeMillis()));
-                    reaction.setReactionID(reactor.getUsername() + content.getContentID());
-                    createdReaction.set(reaction);
-                    content.setNumOfReactions(content.getNumOfReactions() + 1);
-                    logger.info("####################################################"+"Angela");
+                .findFirst();
 
-                }, () -> {
-                    Reaction newReaction = new Reaction(reactor, reactionTypeEnum, content);
-                    newReaction.setTimestamp(new Timestamp(System.currentTimeMillis()));
-                    newReaction.setReactionID(reactor.getUsername() + content.getContentID());
-                    content.getReactions().add(newReaction);
-                    content.setNumOfReactions(content.getNumOfReactions() + 1);
-                    logger.info("####################################################1"+content.getNumOfReactions() + 1);
-                    createdReaction.set(newReaction);
-                });
-        logger.info("####################################################2"+content.getNumOfReactions() + 1);
-        contentRepository.save(content);
-        System.out.println(createdReaction.get().getReactionID());
-        reactionRepository.save(createdReaction.get());
-        return createdReaction.get();
-
+        if (existingReaction.isPresent()) {
+            throw new ReactionAlreadyExistsException(reactorID);
+        } else {
+            Reaction newReaction = new Reaction(reactor, reactionTypeEnum, content);
+            newReaction.setTimestamp(new Timestamp(System.currentTimeMillis()));
+            newReaction.setReactionID(reactor.getUsername() + content.getContentID());
+            content.getReactions().add(newReaction);
+            content.setNumOfReactions(content.getNumOfReactions() + 1);
+            contentRepository.save(content);
+            reactionRepository.save(newReaction);
+            System.out.println(newReaction.getReactionID());
+            return newReaction;
+        }
     }
+
 
     public Map<String, ?> isReactor(String username, String reactionID) {
         Optional<Reaction> reactionOptional = reactionRepository.findByReactionID(reactionID);

@@ -59,23 +59,23 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const { isOpen: isOpenComment, onOpen: onOpenComment, onClose: onCloseComment } = useDisclosure();
 
 
-    const fetchReactors = async (postId, reactionType) => {
-        try {
-            const response = await ApiCalls.get(`http://localhost:8080/content/${postId}/reactions/${reactionType}/users`);
-            const data = response.data;
-            console.log('Reactors data:', data);
-            setReactors(data?._embedded?.userList); // Adjust according to your actual response structure
-        } catch (error) {
-            Toast({
-                title: 'Failed to fetch reactors.',
-                description: `Error: ${error.message}`,
-                status: 'error',
-                duration: 2000,
-                isClosable: true,
-                position: 'top',
-            });
-        }
-    };
+    // const fetchReactors = async (postId, reactionType) => {
+    //     try {
+    //         const response = await ApiCalls.get(`http://localhost:8080/content/${postId}/reactions/${reactionType}/users`);
+    //         const data = response.data;
+    //         console.log('Reactors data:', data);
+    //         setReactors(data?._embedded?.userList); // Adjust according to your actual response structure
+    //     } catch (error) {
+    //         Toast({
+    //             title: 'Failed to fetch reactors.',
+    //             description: `Error: ${error.message}`,
+    //             status: 'error',
+    //             duration: 2000,
+    //             isClosable: true,
+    //             position: 'top',
+    //         });
+    //     }
+    // };
 
     const toProperCase = (str) => {
         if (str == null) return null;
@@ -107,58 +107,94 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
         fetchData();
     }, []);
 
-    const addReaction = async () => {
-        console.log('Postadd:', post);
 
+    const toggleReaction = async () => {
+        const willBeReacted = !isReacted;
+        setIsReacted(willBeReacted);
+        try {
+            if (willBeReacted) {
+                await addReaction();
+            } else {
+                await removeReaction();
+            }
+        } catch (error) {
+            console.error("Error in toggling reaction:", error);
+            Toast({
+                title: 'Error toggling reaction',
+                description: `Error: ${error.message}`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'top',
+            });
+            setIsReacted(!willBeReacted);
+        }
+    };
+
+
+    const addReaction = async () => {
         try {
             const postData = {
                 reactorID: user,
                 reactionType: reaction.toUpperCase(),
             };
-            let uri;
-            if (sharedPost && sharedPost.contentType == 'Post') {
-                uri = post._links.reactions.href;
-            } else {
-                uri = sharedPost._links.sub_reactions.href;
+            let uri = sharedPost && sharedPost.contentType === 'Post' ?
+                post._links?.reactions?.href :
+                sharedPost._links?.sub_reactions?.href;
+
+            if (!uri) {
+                throw new Error("URI for adding reaction is undefined");
             }
-            console.log('URI:', uri);
+
             const response = await ApiCalls.post(uri, postData);
-            console.log('Success:', response.data);
-            if (!isReacted) setReactionCount((prev) => prev + 1);
+            console.log('Reaction added:', response.data);
+            if (!isReacted) setReactionCount(prev => prev + 1);
             setIsReacted(true);
-            console.log('Success:', response.data);
         } catch (error) {
-            console.error('Error:', error);
+            console.error("Error adding reaction:", error);
+            Toast({
+                title: 'Failed to add reaction',
+                description: `Error: ${error.message}`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'top',
+            });
         }
     };
 
     const removeReaction = async () => {
         try {
-            console.log('Postrem:', post);
-            let uri;
+            let uri = sharedPost && sharedPost.contentType === 'Post' ?
+                post._links?.deleteReaction?.href :
+                sharedPost._links?.sub_deleteReaction?.href;
+            console.log('Post:', post);
+            console.log('SharedPost:', sharedPost);
 
-            if (sharedPost && sharedPost.contentType == 'Post') {
-                uri = post._links.deleteReaction.href;
-                console.log('delete', sharedPost._links.deleteReaction.href)
-            } else {
-                console.log('delete:', sharedPost._links.sub_deleteReaction.href)
-                uri = sharedPost._links.sub_deleteReaction.href;
-            }
             console.log('URI:', uri);
+
+            if (!uri) {
+                throw new Error("URI for removing reaction is undefined");
+            }
+
             const response = await ApiCalls.delete(uri);
-            if (isReacted) setReactionCount((prev) => prev - 1);
+            console.log('Reaction removed:', response.data);
+            if (isReacted) setReactionCount(prev => prev - 1);
             setIsReacted(false);
-            console.log('Success:', response.data);
         } catch (error) {
-            console.error('Error:', error);
+            console.error("Error removing reaction:", error);
+            Toast({
+                title: 'Failed to remove reaction',
+                description: `Error: ${error.message}`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'top',
+            });
         }
     };
 
-    const toggleReaction = async () => {
-        if (isReacted) removeReaction();
-        else addReaction();
-        setIsReacted((prev) => !prev);
-    };
+
 
     const getIcon = () => {
         if (!isReacted) return <FontAwesomeIcon icon={regularThumbsUp} />;
@@ -189,16 +225,16 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const duration = moment(localTime).fromNow();
 
 
-    const Reactor = function ({ name, profilePicUrl }) {
-        return (
-            <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
-                <Avatar name={name} src={profilePicUrl || undefined} />
-                <Box alignItems="left">
-                    <Heading size='sm' textAlign={['left']}>{toProperCase(name)}</Heading>
-                </Box>
-            </Flex>
-        )
-    }
+    // const Reactor = function ({ name, profilePicUrl }) {
+    //     return (
+    //         <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
+    //             <Avatar name={name} src={profilePicUrl || undefined} />
+    //             <Box alignItems="left">
+    //                 <Heading size='sm' textAlign={['left']}>{toProperCase(name)}</Heading>
+    //             </Box>
+    //         </Flex>
+    //     )
+    // }
 
     return (
         <>
@@ -270,35 +306,38 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                         },
                     }}
                 >
-                    <Popup
-                        trigger={
-                            <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction('like'); toggleReaction(); }}>
-                                <Box as="span" mr="2">{reactionCount}</Box> Like
-                            </Button>
-                        }
-                        position='top center'
-                        on='hover'
-                        closeOnDocumentClick
-                        mouseLeaveDelay={300}
-                        mouseEnterDelay={0}
-                        contentStyle={{ padding: '0px', border: 'none' }}
-                        arrow={false}
-                    >
-                        <ReactionBarSelector
-                            reactions={[
-                                { label: 'like', node: <div>👍</div>, key: 'like' },
-                                { label: 'dislike', node: <div>👎</div>, key: 'dislike' },
-                                { label: 'love', node: <div>❤️</div>, key: 'love' },
-                                { label: 'support', node: <div>👏</div>, key: 'support' },
-                                { label: 'haha', node: <div>😄</div>, key: 'haha' },
-                            ]}
-                            iconSize='20px'
-                            onSelect={(key) => {
-                                setReaction(key);
-                                addReaction();
-                            }}
-                        />
-                    </Popup>
+                    {/*<Popup*/}
+                    {/*    trigger={*/}
+                    {/*        <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction('like'); toggleReaction(); }}>*/}
+                    {/*            <Box as="span" mr="2">{reactionCount}</Box> Like*/}
+                    {/*        </Button>*/}
+                    {/*    }*/}
+                    {/*    position='top center'*/}
+                    {/*    on='hover'*/}
+                    {/*    closeOnDocumentClick*/}
+                    {/*    mouseLeaveDelay={300}*/}
+                    {/*    mouseEnterDelay={0}*/}
+                    {/*    contentStyle={{ padding: '0px', border: 'none' }}*/}
+                    {/*    arrow={false}*/}
+                    {/*>*/}
+                    {/*    <ReactionBarSelector*/}
+                    {/*        reactions={[*/}
+                    {/*            { label: 'like', node: <div>👍</div>, key: 'like' },*/}
+                    {/*            { label: 'dislike', node: <div>👎</div>, key: 'dislike' },*/}
+                    {/*            { label: 'love', node: <div>❤️</div>, key: 'love' },*/}
+                    {/*            { label: 'support', node: <div>👏</div>, key: 'support' },*/}
+                    {/*            { label: 'haha', node: <div>😄</div>, key: 'haha' },*/}
+                    {/*        ]}*/}
+                    {/*        iconSize='20px'*/}
+                    {/*        onSelect={(key) => {*/}
+                    {/*            setReaction(key);*/}
+                    {/*            addReaction();*/}
+                    {/*        }}*/}
+                    {/*    />*/}
+                    {/*</Popup>*/}
+                    <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction('like'); toggleReaction(); }}>
+                        <Box as="span" mr="2">{reactionCount}</Box> Like
+                    </Button>
                     <Button onClick={onOpenComment} flex='1' variant='ghost' leftIcon={<BiChat />}><Box as="span" mr="2">{commentsCount}</Box>
                         Comment
                     </Button>

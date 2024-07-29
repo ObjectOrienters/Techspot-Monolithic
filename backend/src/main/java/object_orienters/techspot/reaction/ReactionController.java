@@ -93,19 +93,19 @@ public class ReactionController {
         }
 
     }
-//    @DeleteMapping("/reactions")
-//    public ResponseEntity<?> deleteReaction(@PathVariable Long contentID) {
-//        try {
-//            logger.info(">>>>Deleting Reaction... @ " + getTimestamp() + "<<<<");
-//            reactionService.deleteReaction(SecurityContextHolder.getContext().getAuthentication().getName()+contentID);
-//            logger.info(">>>>Reaction Deleted. @ " + getTimestamp() + "<<<<");
-//            return ResponseEntity.noContent().build();
-//        } catch (ReactionNotFoundException e) {
-//            logger.info(">>>>Error Occurred:  " + e.getMessage() + " @ " + getTimestamp() + "<<<<");
-//            return ExceptionsResponse.getErrorResponseEntity(e, HttpStatus.NOT_FOUND);
-//
-//        }
-//    }
+    @DeleteMapping("/reactions")
+    public ResponseEntity<?> deleteReaction(@PathVariable Long contentID) {
+        try {
+            logger.info(">>>>Deleting Reaction... @ " + getTimestamp() + "<<<<");
+            reactionService.deleteReaction(SecurityContextHolder.getContext().getAuthentication().getName()+contentID);
+            logger.info(">>>>Reaction Deleted. @ " + getTimestamp() + "<<<<");
+            return ResponseEntity.noContent().build();
+        } catch (ReactionNotFoundException e) {
+            logger.info(">>>>Error Occurred:  " + e.getMessage() + " @ " + getTimestamp() + "<<<<");
+            return ExceptionsResponse.getErrorResponseEntity(e, HttpStatus.NOT_FOUND);
+
+        }
+    }
 
     @GetMapping("/reactions/{username}")
     public ResponseEntity<?> isReactor(@PathVariable Long contentID, @PathVariable String username) {
