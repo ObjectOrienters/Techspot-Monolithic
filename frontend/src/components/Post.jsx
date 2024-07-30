@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef, useContext } from 'react';
+import React, { useEffect, useState, forwardRef, useContext, useRef } from 'react';
 import {
     Avatar, Box, Button, Card, CardBody, CardFooter, CardHeader, Drawer,
     DrawerBody, DrawerContent, DrawerHeader, DrawerOverlay, Flex,
@@ -24,7 +24,7 @@ import { dark, docco, dracula, gruvboxDark, lightfair, solarizedDark, solarizedL
 import { useAuth } from './AuthProvider';
 import ApiCalls from './ApiCalls';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThumbsDown, faHeart, faFaceLaughSquint, faHandsClapping, faThumbsUp as solidThumbsUp } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsDown, faHeart, faFaceLaughSquint, faHandsClapping, faThumbsUp as solidThumbsUp, faL } from '@fortawesome/free-solid-svg-icons';
 import { faThumbsUp as regularThumbsUp } from '@fortawesome/free-regular-svg-icons';
 
 import useProfileLoading from './useProfileLoading';
@@ -42,8 +42,9 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const { profile } = useParams();
     const navigate = useNavigate();
     const [isReacted, setIsReacted] = useState(false);
+    // const isReacted =  useRef(false);
     const { user, token } = useAuth();
-    const [reaction, setReaction] = useState('like');
+    const [reaction, setReaction] = useState(null);
     const [reactionCount, setReactionCount] = useState(post.numOfReactions);
     const [commentsCount, setCommentsCount] = useState(post.numOfComments);
     const [sharesCount, setSharesCount] = useState(post.numOfShares);
@@ -78,6 +79,13 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
         }
     };
 
+    useEffect(() => {
+        if (reaction && !isReacted) {
+            console.log('Updated reaction:', reaction);
+            addReaction();
+        }
+    }, [reaction]);
+
     const toProperCase = (str) => {
         if (str == null) return null;
         return str.toLowerCase().replace(/\b\w/g, function (char) {
@@ -96,13 +104,18 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     useEffect(() => {
         async function fetchData() {
             const response = await ApiCalls.get('/content/' + post.contentID + '/reactions/' + user);
+            console.log('/content/' + post.contentID + '/reactions/' + user);
             const data = await response.data;
 
-            if (data.isReactor === true) {
+            if (data.isReactor == true) {
                 setIsReacted(true);
-                setReaction(data.reactionType.toLowerCase());
+                // isReacted.current = true;
+
+                setReaction(()=>data.reactionType.toLowerCase());
             } else {
                 setIsReacted(false);
+                // isReacted.current = false;
+
             }
         }
         fetchData();
@@ -127,38 +140,53 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
             console.log('Success:', response.data);
             if (!isReacted) setReactionCount((prev) => prev + 1);
             setIsReacted(true);
+            // isReacted.current = true;
+
             console.log('Success:', response.data);
         } catch (error) {
             console.error('Error:', error);
         }
+        console.debug("adding", isReacted);
+
     };
 
     const removeReaction = async () => {
         try {
-            console.log('Postrem:', post);
-            let uri;
-
-            if (sharedPost && sharedPost.contentType == 'Post') {
-                uri = post._links.deleteReaction.href;
-                console.log('delete', sharedPost._links.deleteReaction.href)
-            } else {
-                console.log('delete:', sharedPost._links.sub_deleteReaction.href)
-                uri = sharedPost._links.sub_deleteReaction.href;
-            }
+            let uri = sharedPost && sharedPost.contentType === 'Post' ?
+                post._links?.deleteReaction?.href :
+                sharedPost._links?.sub_deleteReaction?.href;
+            console.log('Post:', post);
+            console.log('SharedPost:', sharedPost);
+    
             console.log('URI:', uri);
+    
+            if (!uri) {
+                throw new Error("URI for removing reaction is undefined");
+            }
+    
             const response = await ApiCalls.delete(uri);
-            if (isReacted) setReactionCount((prev) => prev - 1);
+            console.log('Reaction removed:', response.data);
+            if (isReacted) setReactionCount(prev => prev - 1);
             setIsReacted(false);
-            console.log('Success:', response.data);
         } catch (error) {
-            console.error('Error:', error);
+            console.error("Error removing reaction:", error);
+            Toast({
+                title: 'Failed to remove reaction',
+                description: `Error: ${error.message}`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'top',
+            });
         }
     };
 
     const toggleReaction = async () => {
-        if (isReacted) removeReaction();
-        else addReaction();
-        setIsReacted((prev) => !prev);
+        if (isReacted) await removeReaction();
+        else await addReaction();
+        //setIsReacted((prev) => !prev);
+        console.debug("toggle", isReacted);
+
     };
 
     const getIcon = () => {
@@ -276,7 +304,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                 >
                     <Popup
                         trigger={
-                            <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction('like'); toggleReaction(); }}>
+                            <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction(()=>'like'); toggleReaction(); }}>
                                 <Box as="span" mr="2">{reactionCount}</Box> Like
                             </Button>
                         }
@@ -298,8 +326,11 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                             ]}
                             iconSize='20px'
                             onSelect={(key) => {
-                                setReaction(key);
-                                addReaction();
+                                console.log(key);
+                                setReaction(()=>key);
+                                console.log(reaction);
+
+                               // addReaction();
                             }}
                         />
                     </Popup>
@@ -311,31 +342,6 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                     </Button>
                 </CardFooter>
             </Card>
-
-            {/* <Drawer placement={'right'} onClose={onClose} isOpen={isOpen} size={'md'}>
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerHeader>Post Comments</DrawerHeader>
-                    <DrawerBody>
-                        <Divider borderColor="black.50" />
-                        <Box overflowY="auto"> <CommentForm post = {post}/></Box>
-                        {/* <Tabs>
-                        <TabList>
-                            <Tab>Comments</Tab>
-                            
-
-                        </TabList>
-
-                        <TabPanels>
-                            <TabPanel>
-                                <Box overflowY="auto"> <Comments currentUserId="1"/></Box>
-                            </TabPanel>
-                            
-                        </TabPanels>
-                    </Tabs> */}
-                    {/* </DrawerBody>
-                </DrawerContent>
-            </Drawer> */} 
 
             <Drawer placement='right' onClose={onSecondDrawerClose} isOpen={isSecondDrawerOpen} size='xs'>
                 <DrawerOverlay />

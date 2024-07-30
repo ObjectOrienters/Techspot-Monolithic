@@ -26,7 +26,7 @@ public class FeedService {
     private final ProfileRepository profileRepository;
     private final FeedByFollowingStrategy feedByFollowingStrategy;
     private final FeedByTag feedByTag;
-    // private FeedByAuthor feedByAuthor;
+     private FeedByAuthor feedByAuthor;
     //private ReactionsByContent reactionsByContent;
     // private CommentsByContent commentsByContent;
     private final SearchByCode searchByCode;
@@ -44,7 +44,7 @@ public class FeedService {
     public FeedService(ProfileRepository profileRepository,
                        FeedByFollowingStrategy feedByFollowingStrategy,
                        FeedByTag feedByTag,
-//                     FeedByAuthor feedByAuthor,
+                     FeedByAuthor feedByAuthor,
 //                     CommentsByContent commentsByContent,
 //                      ReactionsByContent reactionsByContent,
                        SearchByName searchByName,
@@ -57,7 +57,7 @@ public class FeedService {
         this.feedByFollowingStrategy = feedByFollowingStrategy;
         this.profileRepository = profileRepository;
         this.feedByTag = feedByTag;
-        // this.feedByAuthor = feedByAuthor;
+         this.feedByAuthor = feedByAuthor;
         // this.commentsByContent = commentsByContent;
 //        this.reactionsByContent = reactionsByContent;
         this.searchByName = searchByName;
@@ -76,8 +76,10 @@ public class FeedService {
                 String clientUsername = SecurityContextHolder.getContext().getAuthentication().getName();
                 Page<Content> feed = feedByFollowingStrategy.operate(profileRepository.findByUsername(clientUsername).orElseThrow(() -> new ProfileNotFoundException(clientUsername)), pageNumber, pageSize);
                 return PagedModel.of(feed.stream().map(postModelAssembler::toModel).toList(), new PagedModel.PageMetadata(feed.getSize(), feed.getNumber(), feed.getTotalElements(), feed.getTotalPages()));
-//            case ONE_USER:
-//                return feedByAuthor.operate(profileRepository.findByUsername(value).orElseThrow(() -> new ProfileNotFoundException(value)), pageNumber, pageSize);
+            case ONE_USER:
+                Page<Post> dd =  feedByAuthor.operate(profileRepository.findByUsername(value).orElseThrow(() -> new ProfileNotFoundException(value)), pageNumber, pageSize);
+                return PagedModel.of(dd.stream().map(postModelAssembler::toModel).toList(), new PagedModel.PageMetadata(dd.getSize(), dd.getNumber(), dd.getTotalElements(), dd.getTotalPages()));
+
             case TOPIC:
                 Page<Post> feedTags = feedByTag.operate(value, pageNumber, pageSize);
                 return PagedModel.of(feedTags.stream().map(postModelAssembler::toModel).toList(), new PagedModel.PageMetadata(feedTags.getSize(), feedTags.getNumber(), feedTags.getTotalElements(), feedTags.getTotalPages()));
@@ -110,7 +112,7 @@ public class FeedService {
 
     enum FeedType {
         ALL_USERS,
-        //  ONE_USER,
+          ONE_USER,
         TOPIC,
         // COMMENTS,
         // REACTIONS,
