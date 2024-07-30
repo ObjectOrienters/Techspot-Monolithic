@@ -16,11 +16,8 @@ import OAuthRedirect from './components/OAuthRedirect';
 import OAuthLogin from './components/OAuthLogin';
 import CodePage from './components/CodePage';
 import NotFoundPage from './components/NotFoundPage';
-import { SelectedCommentProvider } from './components/Comments/CommentsContext';
-import ProfileSearchComponents from './components/ProfileSearchComponents';
-import CompaniesCard from './components/CompaniesCard';
-import CommentForm from './components/Commentss/CommentForm';
-import Comment from './components/Commentss/Comment';
+
+
 
 
 
@@ -31,7 +28,6 @@ function App() {
 
         <Router>
             <AuthProvider>
-                <SelectedCommentProvider>
                     <Routes>
 
                         <Route path="/" element={<Landing />} />
@@ -58,7 +54,7 @@ function App() {
 
 
                     </Routes>
-                </SelectedCommentProvider>
+
             </AuthProvider>
         </Router>
     );

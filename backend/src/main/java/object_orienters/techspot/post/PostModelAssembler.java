@@ -31,7 +31,7 @@ public class PostModelAssembler implements RepresentationModelAssembler<Content,
         if(entity.getContentType() == ContentType.SharedPost){
             SharedPost sharedPost = (SharedPost) entity;
             e.add(linkTo(methodOn(ReactionController.class).getReactions(sharedPost.getPost().getContentID(), 0, 10)).withRel("sub_reactions"));
-            e.add(linkTo(methodOn(ReactionController.class).deleteReaction(sharedPost.getPost().getContentID())).withRel("sub_deleteReaction"));
+            //e.add(linkTo(methodOn(ReactionController.class).deleteReaction(sharedPost.getPost().getContentID())).withRel("sub_deleteReaction"));
         }
         return e;
 

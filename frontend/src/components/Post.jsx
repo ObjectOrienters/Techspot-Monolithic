@@ -35,12 +35,13 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import moment from 'moment';
 import EditPost from './EditPost';
 import DeletePost from './DeletePost';
-import { CommentsContext } from './Comments/CommentsContext';
+import {grey} from "@mui/material/colors";
 
 const Post = forwardRef(({ post, sharedPost }, ref) => {
     const [profilePicUrl, setProfilePicUrl] = useState(null);
     const { profile } = useParams();
     const navigate = useNavigate();
+
     const [isReacted, setIsReacted] = useState(false);
     // const isReacted =  useRef(false);
     const { user, token } = useAuth();
@@ -59,25 +60,24 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const { isOpen: isOpenDelete, onOpen: onOpenDelete, onClose: onCloseDelete } = useDisclosure();
     const { isOpen: isOpenComment, onOpen: onOpenComment, onClose: onCloseComment } = useDisclosure();
 
-    const { setPostId } = useContext(CommentsContext);
 
-    const fetchReactors = async (postId, reactionType) => {
-        try {
-            const response = await ApiCalls.get(`http://localhost:8080/content/${postId}/reactions/${reactionType}/users`);
-            const data = response.data;
-            console.log('Reactors data:', data);
-            setReactors(data?._embedded?.userList); // Adjust according to your actual response structure
-        } catch (error) {
-            Toast({
-                title: 'Failed to fetch reactors.',
-                description: `Error: ${error.message}`,
-                status: 'error',
-                duration: 2000,
-                isClosable: true,
-                position: 'top',
-            });
-        }
-    };
+    // const fetchReactors = async (postId, reactionType) => {
+    //     try {
+    //         const response = await ApiCalls.get(`http://localhost:8080/content/${postId}/reactions/${reactionType}/users`);
+    //         const data = response.data;
+    //         console.log('Reactors data:', data);
+    //         setReactors(data?._embedded?.userList); // Adjust according to your actual response structure
+    //     } catch (error) {
+    //         Toast({
+    //             title: 'Failed to fetch reactors.',
+    //             description: `Error: ${error.message}`,
+    //             status: 'error',
+    //             duration: 2000,
+    //             isClosable: true,
+    //             position: 'top',
+    //         });
+    //     }
+    // };
 
     useEffect(() => {
         if (reaction && !isReacted) {
@@ -121,30 +121,63 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
         fetchData();
     }, []);
 
-    const addReaction = async () => {
-        console.log('Postadd:', post);
 
+    const toggleReaction = async () => {
+        const willBeReacted = !isReacted;
+        setIsReacted(willBeReacted);
+        try {
+            if (willBeReacted) {
+                await addReaction();
+            } else {
+                await removeReaction();
+            }
+        } catch (error) {
+            console.error("Error in toggling reaction:", error);
+            Toast({
+                title: 'Error toggling reaction',
+                description: `Error: ${error.message}`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'top',
+            });
+            setIsReacted(!willBeReacted);
+        }
+    };
+
+
+    const addReaction = async () => {
         try {
             const postData = {
                 reactorID: user,
                 reactionType: reaction.toUpperCase(),
             };
-            let uri;
-            if (sharedPost && sharedPost.contentType == 'Post') {
-                uri = post._links.reactions.href;
-            } else {
-                uri = sharedPost._links.sub_reactions.href;
+            let uri = sharedPost && sharedPost.contentType === 'Post' ?
+                post._links?.reactions?.href :
+                sharedPost._links?.sub_reactions?.href;
+
+            if (!uri) {
+                throw new Error("URI for adding reaction is undefined");
             }
-            console.log('URI:', uri);
+
             const response = await ApiCalls.post(uri, postData);
-            console.log('Success:', response.data);
-            if (!isReacted) setReactionCount((prev) => prev + 1);
+            console.log('Reaction added:', response.data);
+            if (!isReacted) setReactionCount(prev => prev + 1);
             setIsReacted(true);
+
             // isReacted.current = true;
 
             console.log('Success:', response.data);
         } catch (error) {
-            console.error('Error:', error);
+            console.error("Error adding reaction:", error);
+            Toast({
+                title: 'Failed to add reaction',
+                description: `Error: ${error.message}`,
+                status: 'error',
+                duration: 2000,
+                isClosable: true,
+                position: 'top',
+            });
         }
         console.debug("adding", isReacted);
 
@@ -181,6 +214,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
         }
     };
 
+
     const toggleReaction = async () => {
         if (isReacted) await removeReaction();
         else await addReaction();
@@ -208,10 +242,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
         }
     };
 
-    const openViewDetails = () => {
-        setPostId()
-        onOpen();
-    };
+
 
 
 
@@ -221,16 +252,16 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const duration = moment(localTime).fromNow();
 
 
-    const Reactor = function ({ name, profilePicUrl }) {
-        return (
-            <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
-                <Avatar name={name} src={profilePicUrl || undefined} />
-                <Box alignItems="left">
-                    <Heading size='sm' textAlign={['left']}>{toProperCase(name)}</Heading>
-                </Box>
-            </Flex>
-        )
-    }
+    // const Reactor = function ({ name, profilePicUrl }) {
+    //     return (
+    //         <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
+    //             <Avatar name={name} src={profilePicUrl || undefined} />
+    //             <Box alignItems="left">
+    //                 <Heading size='sm' textAlign={['left']}>{toProperCase(name)}</Heading>
+    //             </Box>
+    //         </Flex>
+    //     )
+    // }
 
     return (
         <>
@@ -262,7 +293,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                 </CardHeader>
                 <CardBody textAlign={'left'}>
                     <Markdown
-                    
+
                         remarkPlugins={[remarkGfm]}
                         className="markdown"
                         children={post.textData}
@@ -302,6 +333,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                         },
                     }}
                 >
+
                     <Popup
                         trigger={
                             <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction(()=>'like'); toggleReaction(); }}>
@@ -342,6 +374,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                     </Button>
                 </CardFooter>
             </Card>
+
 
             <Drawer placement='right' onClose={onSecondDrawerClose} isOpen={isSecondDrawerOpen} size='xs'>
                 <DrawerOverlay />
@@ -402,10 +435,10 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
 
             <Modal isOpen={isOpenComment} onClose={onCloseComment} isCentered>
                 <ModalOverlay />
-                <ModalContent maxW="32vw">
+                <ModalContent >
                     <ModalCloseButton mr={'-10px'} mt={'2px'} />
-                    <ModalBody m={"10px"}>
-                        <CommentForm post={post}></CommentForm>
+                    <ModalBody >
+                        <CommentForm content={post} setCommentsCount={setCommentsCount}></CommentForm>
                     </ModalBody>
                 </ModalContent>
             </Modal>
