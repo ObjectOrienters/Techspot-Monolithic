@@ -1,6 +1,5 @@
 FROM openjdk:23-jdk-slim-bullseye
 WORKDIR /app
-COPY target/*.jar /app/backend.jar
-CMD ["java", "-jar", "/app/backend.jar"]
-COPY target/classes/techspot-objectorienters-firebase-adminsdk-bqho2-f5981f1058.json /app/backend/src/main/resources/techspot-objectorienters-firebase-adminsdk-bqho2-f5981f1058.json
+COPY target/ /app/target/
+CMD ["java", "-jar", "/app/target/techspot-0.0.1-SNAPSHOT.jar"]
 EXPOSE 8080

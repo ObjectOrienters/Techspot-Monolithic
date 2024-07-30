@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef, useContext } from 'react';
+import React, { useEffect, useState, forwardRef, useContext, useRef } from 'react';
 import {
     Avatar, Box, Button, Card, CardBody, CardFooter, CardHeader, Drawer,
     DrawerBody, DrawerContent, DrawerHeader, DrawerOverlay, Flex,
@@ -24,7 +24,7 @@ import { dark, docco, dracula, gruvboxDark, lightfair, solarizedDark, solarizedL
 import { useAuth } from './AuthProvider';
 import ApiCalls from './ApiCalls';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThumbsDown, faHeart, faFaceLaughSquint, faHandsClapping, faThumbsUp as solidThumbsUp } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsDown, faHeart, faFaceLaughSquint, faHandsClapping, faThumbsUp as solidThumbsUp, faL } from '@fortawesome/free-solid-svg-icons';
 import { faThumbsUp as regularThumbsUp } from '@fortawesome/free-regular-svg-icons';
 
 import useProfileLoading from './useProfileLoading';
@@ -41,9 +41,11 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const [profilePicUrl, setProfilePicUrl] = useState(null);
     const { profile } = useParams();
     const navigate = useNavigate();
-    const { user, token } = useAuth();
+
     const [isReacted, setIsReacted] = useState(false);
-    const [reaction, setReaction] = useState('like');
+    // const isReacted =  useRef(false);
+    const { user, token } = useAuth();
+    const [reaction, setReaction] = useState(null);
     const [reactionCount, setReactionCount] = useState(post.numOfReactions);
     const [commentsCount, setCommentsCount] = useState(post.numOfComments);
     const [sharesCount, setSharesCount] = useState(post.numOfShares);
@@ -77,6 +79,13 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     //     }
     // };
 
+    useEffect(() => {
+        if (reaction && !isReacted) {
+            console.log('Updated reaction:', reaction);
+            addReaction();
+        }
+    }, [reaction]);
+
     const toProperCase = (str) => {
         if (str == null) return null;
         return str.toLowerCase().replace(/\b\w/g, function (char) {
@@ -95,13 +104,18 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     useEffect(() => {
         async function fetchData() {
             const response = await ApiCalls.get('/content/' + post.contentID + '/reactions/' + user);
+            console.log('/content/' + post.contentID + '/reactions/' + user);
             const data = await response.data;
 
-            if (data.isReactor === true) {
+            if (data.isReactor == true) {
                 setIsReacted(true);
-                setReaction(data.reactionType.toLowerCase());
+                // isReacted.current = true;
+
+                setReaction(()=>data.reactionType.toLowerCase());
             } else {
                 setIsReacted(false);
+                // isReacted.current = false;
+
             }
         }
         fetchData();
@@ -150,6 +164,10 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
             console.log('Reaction added:', response.data);
             if (!isReacted) setReactionCount(prev => prev + 1);
             setIsReacted(true);
+
+            // isReacted.current = true;
+
+            console.log('Success:', response.data);
         } catch (error) {
             console.error("Error adding reaction:", error);
             Toast({
@@ -161,6 +179,8 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                 position: 'top',
             });
         }
+        console.debug("adding", isReacted);
+
     };
 
     const removeReaction = async () => {
@@ -170,13 +190,13 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                 sharedPost._links?.sub_deleteReaction?.href;
             console.log('Post:', post);
             console.log('SharedPost:', sharedPost);
-
+    
             console.log('URI:', uri);
-
+    
             if (!uri) {
                 throw new Error("URI for removing reaction is undefined");
             }
-
+    
             const response = await ApiCalls.delete(uri);
             console.log('Reaction removed:', response.data);
             if (isReacted) setReactionCount(prev => prev - 1);
@@ -195,6 +215,13 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     };
 
 
+    const toggleReaction = async () => {
+        if (isReacted) await removeReaction();
+        else await addReaction();
+        //setIsReacted((prev) => !prev);
+        console.debug("toggle", isReacted);
+
+    };
 
     const getIcon = () => {
         if (!isReacted) return <FontAwesomeIcon icon={regularThumbsUp} />;
@@ -306,46 +333,84 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                         },
                     }}
                 >
-                    {/*<Popup*/}
-                    {/*    trigger={*/}
-                    {/*        <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction('like'); toggleReaction(); }}>*/}
-                    {/*            <Box as="span" mr="2">{reactionCount}</Box> Like*/}
-                    {/*        </Button>*/}
-                    {/*    }*/}
-                    {/*    position='top center'*/}
-                    {/*    on='hover'*/}
-                    {/*    closeOnDocumentClick*/}
-                    {/*    mouseLeaveDelay={300}*/}
-                    {/*    mouseEnterDelay={0}*/}
-                    {/*    contentStyle={{ padding: '0px', border: 'none' }}*/}
-                    {/*    arrow={false}*/}
-                    {/*>*/}
-                    {/*    <ReactionBarSelector*/}
-                    {/*        reactions={[*/}
-                    {/*            { label: 'like', node: <div>👍</div>, key: 'like' },*/}
-                    {/*            { label: 'dislike', node: <div>👎</div>, key: 'dislike' },*/}
-                    {/*            { label: 'love', node: <div>❤️</div>, key: 'love' },*/}
-                    {/*            { label: 'support', node: <div>👏</div>, key: 'support' },*/}
-                    {/*            { label: 'haha', node: <div>😄</div>, key: 'haha' },*/}
-                    {/*        ]}*/}
-                    {/*        iconSize='20px'*/}
-                    {/*        onSelect={(key) => {*/}
-                    {/*            setReaction(key);*/}
-                    {/*            addReaction();*/}
-                    {/*        }}*/}
-                    {/*    />*/}
-                    {/*</Popup>*/}
-                    <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction('like'); toggleReaction(); }}>
-                        <Box as="span" mr="2">{reactionCount}</Box> Like
-                    </Button>
-                    <Button onClick={onOpenComment} flex='1' variant='ghost' leftIcon={<BiChat />}><Box as="span" mr="2">{commentsCount}</Box>
-                        Comment
+
+                    <Popup
+                        trigger={
+                            <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction(()=>'like'); toggleReaction(); }}>
+                                <Box as="span" mr="2">{reactionCount}</Box> Like
+                            </Button>
+                        }
+                        position='top center'
+                        on='hover'
+                        closeOnDocumentClick
+                        mouseLeaveDelay={300}
+                        mouseEnterDelay={0}
+                        contentStyle={{ padding: '0px', border: 'none' }}
+                        arrow={false}
+                    >
+                        <ReactionBarSelector
+                            reactions={[
+                                { label: 'like', node: <div>👍</div>, key: 'like' },
+                                { label: 'dislike', node: <div>👎</div>, key: 'dislike' },
+                                { label: 'love', node: <div>❤️</div>, key: 'love' },
+                                { label: 'support', node: <div>👏</div>, key: 'support' },
+                                { label: 'haha', node: <div>😄</div>, key: 'haha' },
+                            ]}
+                            iconSize='20px'
+                            onSelect={(key) => {
+                                console.log(key);
+                                setReaction(()=>key);
+                                console.log(reaction);
+
+                               // addReaction();
+                            }}
+                        />
+                    </Popup>
+                    <Button onClick={onOpenComment} flex='1' variant='ghost' leftIcon={<BiChat />}>
+                        <Box as="span" mr="2">{commentsCount}</Box> Comment
                     </Button>
                     <Button flex='1' variant='ghost' leftIcon={<BiShare />} onClick={onOpenY}>
                         Share
                     </Button>
                 </CardFooter>
             </Card>
+
+
+            <Drawer placement='right' onClose={onSecondDrawerClose} isOpen={isSecondDrawerOpen} size='xs'>
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerHeader>Post Reactions</DrawerHeader>
+                    <DrawerBody>
+                        <Tabs>
+                            <TabList>
+                                <Tab><div>👍</div></Tab>
+                                <Tab><div>👎</div></Tab>
+                                <Tab><div>❤️</div></Tab>
+                                <Tab><div>👏</div></Tab>
+                                <Tab><div>😄</div></Tab>
+                            </TabList>
+
+                            <Box flex="1" overflowY="auto">
+                                <TabPanels>
+                                    <TabPanel>
+                                        <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
+                                            <Avatar name={post.contentAuthor?.name} src={profilePicUrl || undefined} />
+                                            <Box alignItems="left">
+                                                <Heading size='sm' textAlign={['left']}>{toProperCase(post.contentAuthor?.name)}</Heading>
+                                            </Box>
+                                        </Flex>
+                                    </TabPanel>
+                                    <TabPanel><p>Content for dislike reactions</p></TabPanel>
+                                    <TabPanel><p>Content for love reactions</p></TabPanel>
+                                    <TabPanel><p>Content for support reactions</p></TabPanel>
+                                    <TabPanel><p>Content for haha reactions</p></TabPanel>
+                                </TabPanels>
+                            </Box>
+                        </Tabs>
+                    </DrawerBody>
+                </DrawerContent>
+            </Drawer>
+
             <Modal isOpen={isOpenY} onClose={onCloseY} isCentered>
                 <ModalOverlay />
                 <ModalContent maxW="32vw">

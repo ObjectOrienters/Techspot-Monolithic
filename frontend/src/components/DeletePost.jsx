@@ -14,12 +14,13 @@ function DeletePost({ post }) {
     const toast = useToast();
 
 
+    console.log("Delete Post", post);
 
     const deletePost = async () => {
         try {
 
-            console.log("**************************************",`/profiles/${user}/posts/${post.contentID}`)
-            const response = await ApiCalls.delete(`/profiles/${user}/posts/${post.contentID}`);
+            console.log(`/profiles/${user}/posts/${post.contentID}`);
+            await ApiCalls.delete(`/profiles/${user}/posts/${post.contentID}`);
             toast({
                 title: 'Deleted Successfully.',
                 description: "Post Deleted.",

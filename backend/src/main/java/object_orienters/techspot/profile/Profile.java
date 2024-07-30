@@ -66,7 +66,7 @@ public class Profile extends UserBase {
     private Set<Profile> followers;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "contentAuthor", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "contentAuthor", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Post> publishedPosts;
 
 

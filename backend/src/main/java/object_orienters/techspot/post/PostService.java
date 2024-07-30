@@ -168,15 +168,18 @@ public class PostService {
                 sharedPostRepository.delete(sharedPost);
             });
 
+            if (user.getPublishedPosts().remove(post))
+                profileRepository.save(user);
+
+
             post.setContentAuthor(null);
             mediaDataUtilities.handleDeleteMediaData(post);
             tagsUtilities.handleDeleteTags(post);
-            post.setMediaData(new ArrayList<>());
-            user.getPublishedPosts().remove(post);
-            post.setComments(new ArrayList<>());
-            post.setReactions(new ArrayList<>());
+            post.getMediaData().clear();
+            post.getComments().clear();
+            post.getReactions().clear();
+
             postRepository.delete(post);
-            profileRepository.save(user);
 
         }
 
