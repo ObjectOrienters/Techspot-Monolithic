@@ -37,7 +37,7 @@ build/
 *.log.*
 
 /backend/src/main/resources/static/media_uploads/*
-
+/target
 
 # Intellij IDEA
 .idea/

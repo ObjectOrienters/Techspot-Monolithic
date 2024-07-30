@@ -14,6 +14,7 @@ function DeletePost({ post }) {
     const toast = useToast();
 
 
+    console.log("Delete Post", post);
 
     const deletePost = async () => {
         try {
