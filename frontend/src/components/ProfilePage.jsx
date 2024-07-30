@@ -39,7 +39,7 @@ function ProfilePage() {
     const { profile } = useParams();
     const navigate = useNavigate();
     const { profileData } = useProfileLoading({ profile });
-    const { user, token } = useAuth();
+    const { user } = useAuth();
     const toast = useToast();
     const [FollowersNumber, setFollowersNumber] = useState(0);
     const [FollowingNumber, setFollowingNumber] = useState(0);
@@ -413,7 +413,7 @@ function ProfilePage() {
 
                 </CardFooter>
             </Card>
-            <ProfilePosts postsURI={profileData?._links?.Posts?.href} />
+            <ProfilePosts user={profile} />
             <Modal isOpen={isOpen} onClose={onClose} isCentered>
                 <ModalOverlay />
                 <ModalContent maxW="45vw" mt={6} h={'950px'}>

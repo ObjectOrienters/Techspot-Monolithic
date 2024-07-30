@@ -73,18 +73,3 @@ function PostList({ feedType, feedValue, offset, limit }) {
 }
 
 export default PostList;
-
-// contentID={post.contentID}
-// timestamp={post.timestamp}
-// textData={post.textData}
-// mediaData={post.mediaData}
-// authorName={post.contentAuthor.name}
-// authorProfilePic={post.contentAuthor.profilePic || '/default-profile.jpg'}
-// authorProfession={post.contentAuthor.profession || 'No Profession'}
-// numOfReactions={post.numOfReactions}
-// numOfComments={post.numOfComments}
-// numOfShares={post.numOfShares}
-// reactionsUrl={post._links.reactions.href}
-// commentsUrl={post._links.comments.href}
-// selfUrl={post._links.self.href}
-// authorUrl={post._links.author.href}

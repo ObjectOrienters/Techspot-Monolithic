@@ -1,7 +1,7 @@
 # TechSpot
 
 TechSpot is a social media application hub designed for developers and tech-interested individuals.
-
+[.gitignore](.gitignore)
 ## Table of Contents
 
 - [Project Main Features](#project-main-features)
