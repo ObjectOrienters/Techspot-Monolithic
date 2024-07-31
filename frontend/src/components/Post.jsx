@@ -8,7 +8,7 @@ import {
     ModalBody,
     ModalOverlay,
     ModalContent,
-    Divider,Toast
+    Divider, Toast
 } from '@chakra-ui/react';
 
 import { BiChat, BiLike, BiShare } from 'react-icons/bi';
@@ -16,7 +16,7 @@ import { BsThreeDotsVertical } from 'react-icons/bs';
 import MediaContentData from './MediaContentData';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import './style.css'; // Import your custom CSS'
+import './style.css'; 
 import { ReactionBarSelector } from '@charkour/react-reactions';
 import Popup from 'reactjs-popup';
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/default-highlight';
@@ -35,7 +35,7 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react';
 import moment from 'moment';
 import EditPost from './EditPost';
 import DeletePost from './DeletePost';
-import {grey} from "@mui/material/colors";
+import { grey } from "@mui/material/colors";
 
 const Post = forwardRef(({ post, sharedPost }, ref) => {
     const [profilePicUrl, setProfilePicUrl] = useState(null);
@@ -43,7 +43,6 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     const navigate = useNavigate();
 
     const [isReacted, setIsReacted] = useState(false);
-    // const isReacted =  useRef(false);
     const { user, token } = useAuth();
     const [reaction, setReaction] = useState(null);
     const [reactionCount, setReactionCount] = useState(post.numOfReactions);
@@ -80,10 +79,8 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     // };
 
     useEffect(() => {
-        if (reaction && !isReacted) {
-            console.log('Updated reaction:', reaction);
-            addReaction();
-        }
+        addReaction();
+        console.log('Reaction:', reaction, "is", isReacted);
     }, [reaction]);
 
     const toProperCase = (str) => {
@@ -109,12 +106,12 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
 
             if (data.isReactor == true) {
                 setIsReacted(true);
-                // isReacted.current = true;
+              
 
-                setReaction(()=>data.reactionType.toLowerCase());
+                setReaction(() => data.reactionType.toLowerCase());
             } else {
                 setIsReacted(false);
-                // isReacted.current = false;
+              
 
             }
         }
@@ -142,7 +139,6 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
             if (!isReacted) setReactionCount(prev => prev + 1);
             setIsReacted(true);
 
-            // isReacted.current = true;
 
             console.log('Success:', response.data);
         } catch (error) {
@@ -161,6 +157,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     };
 
     const removeReaction = async () => {
+
         try {
             let uri = sharedPost && sharedPost.contentType === 'Post' ?
                 post._links?.deleteReaction?.href :
@@ -193,11 +190,11 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
     };
 
 
-    const toggleReaction = async () => {
+    const toggleReaction = async (reactionType) => {
         if (isReacted) await removeReaction();
-        else await addReaction();
-        //setIsReacted((prev) => !prev);
-        console.debug("toggle", isReacted);
+        else setReaction(() => reactionType);
+ 
+        console.log("toggle reactionType", reactionType);
 
     };
 
@@ -243,7 +240,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
 
     return (
         <>
-            <Card ref={ref} key={post.contentID}  mt={5} w={'100%'}>
+            <Card ref={ref} key={post.contentID} mt={5} w={'100%'}>
                 <CardHeader marginBottom='-6'>
                     <Flex spacing='4'>
                         <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
@@ -314,7 +311,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
 
                     <Popup
                         trigger={
-                            <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null} onClick={() => { setReaction(()=>'like'); toggleReaction(); }}>
+                            <Button flex='1' variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null}>
                                 <Box as="span" mr="2">{reactionCount}</Box> Like
                             </Button>
                         }
@@ -337,10 +334,8 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                             iconSize='20px'
                             onSelect={(key) => {
                                 console.log(key);
-                                setReaction(()=>key);
-                                console.log(reaction);
+                                toggleReaction(key);
 
-                               // addReaction();
                             }}
                         />
                     </Popup>
