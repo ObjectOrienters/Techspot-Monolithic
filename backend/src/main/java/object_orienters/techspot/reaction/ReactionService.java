@@ -66,6 +66,7 @@ public class ReactionService {
     }
 
     public Reaction createReaction(String reactorID, String reactionType, Long contentId) {
+        System.out.println("nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn " + contentId);
         Reaction.ReactionType reactionTypeEnum = Reaction.ReactionType.valueOf(reactionType);
 
         Profile reactor = profileRepository.findById(reactorID)
@@ -73,6 +74,8 @@ public class ReactionService {
 
         ReactableContent content = contentRepository.findByContentID(contentId)
                 .orElseThrow(() -> new ContentNotFoundException(contentId));
+
+        System.out.println(content.getNumOfReactions());
 
         Optional<Reaction> existingReaction = content.getReactions().stream()
                 .filter(reaction -> reaction.getReactor().getUsername().equals(reactor.getUsername()))
@@ -89,8 +92,10 @@ public class ReactionService {
             newReaction.setTimestamp(new Timestamp(System.currentTimeMillis()));
             newReaction.setReactionID(reactor.getUsername() + content.getContentID());
             content.getReactions().add(newReaction);
+            System.out.println("Before "+ content.getNumOfReactions());
             content.setNumOfReactions(content.getNumOfReactions() + 1);
             contentRepository.save(content);
+            System.out.println("After "+ content.getNumOfReactions());
             reactionRepository.save(newReaction);
             System.out.println(newReaction.getReactionID());
             return newReaction;
