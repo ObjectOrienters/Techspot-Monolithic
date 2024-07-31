@@ -121,32 +121,9 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
         fetchData();
     }, []);
 
-
-    const toggleReaction = async () => {
-        const willBeReacted = !isReacted;
-        setIsReacted(willBeReacted);
-        try {
-            if (willBeReacted) {
-                await addReaction();
-            } else {
-                await removeReaction();
-            }
-        } catch (error) {
-            console.error("Error in toggling reaction:", error);
-            Toast({
-                title: 'Error toggling reaction',
-                description: `Error: ${error.message}`,
-                status: 'error',
-                duration: 2000,
-                isClosable: true,
-                position: 'top',
-            });
-            setIsReacted(!willBeReacted);
-        }
-    };
-
-
     const addReaction = async () => {
+        console.log('Postadd:', post);
+
         try {
             const postData = {
                 reactorID: user,
@@ -159,7 +136,7 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
             if (!uri) {
                 throw new Error("URI for adding reaction is undefined");
             }
-
+            console.log('URI:', uri);
             const response = await ApiCalls.post(uri, postData);
             console.log('Reaction added:', response.data);
             if (!isReacted) setReactionCount(prev => prev + 1);
@@ -190,17 +167,18 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
                 sharedPost._links?.sub_deleteReaction?.href;
             console.log('Post:', post);
             console.log('SharedPost:', sharedPost);
-    
+
             console.log('URI:', uri);
-    
+
             if (!uri) {
                 throw new Error("URI for removing reaction is undefined");
             }
-    
+
             const response = await ApiCalls.delete(uri);
             console.log('Reaction removed:', response.data);
             if (isReacted) setReactionCount(prev => prev - 1);
             setIsReacted(false);
+            console.log('Success:', response.data);
         } catch (error) {
             console.error("Error removing reaction:", error);
             Toast({
