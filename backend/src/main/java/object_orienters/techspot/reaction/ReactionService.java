@@ -79,7 +79,11 @@ public class ReactionService {
                 .findFirst();
 
         if (existingReaction.isPresent()) {
-            throw new ReactionAlreadyExistsException(reactorID);
+            Reaction editedReaction = existingReaction.get();
+            editedReaction.setType(reactionTypeEnum);
+            reactionRepository.save(editedReaction);
+            return editedReaction;
+//            throw new ReactionAlreadyExistsException(reactorID);
         } else {
             Reaction newReaction = new Reaction(reactor, reactionTypeEnum, content);
             newReaction.setTimestamp(new Timestamp(System.currentTimeMillis()));
