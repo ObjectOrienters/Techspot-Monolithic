@@ -6,15 +6,14 @@ import object_orienters.techspot.postTypes.DataTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
 @Service
 public class MediaDataUtilities {
 
-    FileStorageService fileStorageService;
-    DataTypeRepository dataTypeRepository;
+    private final FileStorageService fileStorageService;
+    private final DataTypeRepository dataTypeRepository;
 
     @Autowired
     public MediaDataUtilities(FileStorageService fileStorageService, DataTypeRepository dataTypeRepository) {
@@ -24,37 +23,29 @@ public class MediaDataUtilities {
 
     public DataType handleAddFile(MultipartFile file) {
         DataType pic = new DataType();
-        String fileName = fileStorageService.storeFile(file);
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/media_uploads/")
-                .path(fileName)
-                .toUriString();
+        String fileUrl = fileStorageService.storeFile(file);
         pic.setType(file.getContentType());
-        pic.setFileName(fileName);
-        pic.setFileUrl(fileDownloadUri);
+        pic.setFileName(file.getOriginalFilename());
+        pic.setFileUrl(fileUrl);
         return pic;
     }
 
     public void handleAddMediaData(List<MultipartFile> files, List<DataType> allMedia) {
         files.stream().forEach((file) -> {
             DataType media = new DataType();
-            String fileName = fileStorageService.storeFile(file);
-            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/media_uploads/")
-                    .path(fileName)
-                    .toUriString();
+            String fileUrl = fileStorageService.storeFile(file);
             media.setType(file.getContentType());
-            media.setFileName(fileName);
-            media.setFileUrl(fileDownloadUri);
+            media.setFileName(file.getOriginalFilename());
+            media.setFileUrl(fileUrl);
             allMedia.add(media);
         });
     }
 
     public void handleDeleteMediaData(ReactableContent post) {
-        post.getMediaData().stream().forEach(media -> {
-            fileStorageService.deleteFile(media.getFileName());
+        post.getMediaData().forEach(media -> {
+            fileStorageService.deleteFile(media.getFileUrl());
             dataTypeRepository.delete(media);
         });
-
     }
 }
+

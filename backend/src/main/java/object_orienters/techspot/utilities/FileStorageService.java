@@ -1,45 +1,39 @@
 package object_orienters.techspot.utilities;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.IOException;
+import java.util.Map;
 
 @Service
 public class FileStorageService {
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    private final Cloudinary cloudinary;
+
+    @Autowired
+    public FileStorageService(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
+    }
 
     public String storeFile(MultipartFile file) {
         try {
-            Path fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
-                                                                                          
-            Files.createDirectories(fileStorageLocation);
-
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path targetLocation = fileStorageLocation.resolve(fileName);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-            return fileName;
-        } catch (Exception e) {
-            throw new RuntimeException("Could not store file " + file.getOriginalFilename() + ". Please try again!", e);
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+            return (String) uploadResult.get("url");
+        } catch (IOException e) {
+            throw new RuntimeException("Could not upload file " + file.getOriginalFilename() + ". Please try again!", e);
         }
     }
 
-    public void deleteFile(String fileName) {
+    public void deleteFile(String fileUrl) {
         try {
-            Path fileStorageLocation = Paths.get(uploadDir).toAbsolutePath()
-                    .toAbsolutePath().normalize();
-            Path filePath = fileStorageLocation.resolve(fileName).normalize();
-            Files.deleteIfExists(filePath);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not delete file " + fileName + ". Please try again!", e);
+            String publicId = fileUrl.substring(fileUrl.lastIndexOf("/") + 1, fileUrl.lastIndexOf("."));
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not delete file. Please try again!", e);
         }
     }
-
 }
