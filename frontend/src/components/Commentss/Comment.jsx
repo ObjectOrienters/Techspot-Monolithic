@@ -26,8 +26,6 @@ import ApiCalls from "../ApiCalls";
      const duration = moment(localTime).fromNow();
      const [isReacted, setIsReacted] = useState(false);
      const [reaction, setReaction] = useState(null);
-     const [reactionCount, setReactionCount] = useState(comment.numOfReactions);
-
      useEffect(() => {
          addReaction();
          console.log('Reaction:', reaction, "is", isReacted);
@@ -167,9 +165,7 @@ import ApiCalls from "../ApiCalls";
               <Popup
 
                   trigger={
-                      <Button  variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null}>
-                          <Box as="span" mr="2">{reactionCount}</Box> Like
-                      </Button>
+                      <Button  variant='ghost' leftIcon={getIcon()} colorScheme={isReacted ? 'blue' : null}>Like</Button>
                   }
                   position='top center'
                   on='hover'
