@@ -191,11 +191,12 @@ const Post = forwardRef(({ post, sharedPost }, ref) => {
 
 
     const toggleReaction = async (reactionType) => {
-        if (isReacted) await removeReaction();
-        else setReaction(() => reactionType);
- 
-        console.log("toggle reactionType", reactionType);
-
+        if (isReacted && (reactionType == reaction)) {await removeReaction();}
+        else if(reactionType == reaction){
+            addReaction();
+        }
+        else{
+            setReaction(() => reactionType)};
     };
 
     const getIcon = () => {
