@@ -70,7 +70,6 @@ import ApiCalls from "../ApiCalls";
              console.log('URI:', uri);
              const response = await ApiCalls.post(uri, reactionData);
              console.log('Reaction added:', response.data);
-             if (!isReacted) setReactionCount(prev => prev + 1);
              setIsReacted(true);
 
 
@@ -104,7 +103,6 @@ import ApiCalls from "../ApiCalls";
 
              const response = await ApiCalls.delete(uri);
              console.log('Reaction removed:', response.data);
-             if (isReacted) setReactionCount(prev => prev - 1);
              setIsReacted(false);
              console.log('Success:', response.data);
          } catch (error) {
