@@ -27,8 +27,7 @@ TechSpot is a social media application hub designed for developers and tech-inte
 - Searching Users by Name or Username
 
 
-## Demo
-![image](https://github.com/user-attachments/assets/de03c7f0-60de-46c2-9174-40a64d1a8607)
+
 
 
 ## Technologies Used
@@ -91,3 +90,18 @@ Import the schema for the database. It can be found in the backend folder `schem
 Developed by [Angela Salem](https://github.com/SilverBullet70), [Husam Ramoni](https://github.com/RamHusam111), and [Yousef Albandak](https://github.com/YousefBandak) for the third-year software engineering project at Bethlehem University.
 
 Contact us: object.orienter@gmail.com
+
+
+## Pictures Demo
+![image](https://github.com/user-attachments/assets/de03c7f0-60de-46c2-9174-40a64d1a8607)
+![WhatsApp Image 2024-08-10 at 8 34 21 PM (1)](https://github.com/user-attachments/assets/e8d6ae98-9036-497e-9724-ecadd088cf34)
+![WhatsApp Image 2024-08-10 at 8 37 52 PM](https://github.com/user-attachments/assets/db8b074e-19b8-4ff7-841c-d3f2897d7d07)
+![WhatsApp Image 2024-08-10 at 8 37 52 PM (1)](https://github.com/user-attachments/assets/d639fca6-b43e-4b91-8b19-625d4855187e)
+![WhatsApp Image 2024-08-10 at 8 37 51 PM](https://github.com/user-attachments/assets/e9dad167-e33a-4cbf-9e04-f7bddedab67e)
+![WhatsApp Image 2024-08-10 at 8 37 51 PM (1)](https://github.com/user-attachments/assets/4ca47d2f-937b-4cea-ba0a-d0fac6c1a11c)
+![WhatsApp Image 2024-08-10 at 8 37 51 PM (2)](https://github.com/user-attachments/assets/d90dbb56-6eec-4c01-af20-a223232d99cd)
+![WhatsApp Image 2024-08-10 at 8 37 50 PM](https://github.com/user-attachments/assets/94df06a5-7b08-4dbe-a1bd-f75a8ed80a2a)
+![WhatsApp Image 2024-08-10 at 8 34 21 PM](https://github.com/user-attachments/assets/b292f60f-f844-43ac-88b3-0c217408a27a)
+![WhatsApp Image 2024-08-10 at 8 24 22 PM](https://github.com/user-attachments/assets/fa9b0359-94e4-4e8c-9c2a-f0947251bd98)
+![WhatsApp Image 2024-08-10 at 8 24 21 PM](https://github.com/user-attachments/assets/2ad429a3-86a6-4c37-a337-79cb0e91ecfc)
+
