@@ -222,6 +222,7 @@ function AddPost() {
                     )}
                     <ModalFooter>
                         <Button
+                            id='add-post'//new
                             colorScheme="blue" mr={-7} mb={-5} onClick={() => {
                                 handleSubmit();
                                 navigate("/home");

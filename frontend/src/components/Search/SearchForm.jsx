@@ -86,6 +86,7 @@ function SearchForm() {
                                 <AiOutlineSearch />
                             </InputLeftElement>
                             <Input
+                                id='inner-search-text-field' //new
                                 type="text"
                                 placeholder="Search..."
                                 value={input}
@@ -100,7 +101,8 @@ function SearchForm() {
                     <DrawerBody>
                         <List spacing={3} mt={4}>
                             {results.map((item, index) => (
-                                <ListItem key={index} paddingX="4" paddingY="2" boxShadow="md" borderRadius="md">
+                                <ListItem id='profile-component-search'//new
+                                 key={index} paddingX="4" paddingY="2" boxShadow="md" borderRadius="md">
                                     {feedType === 'PROFILES' ? (
                                         <ProfileSearchComponents
                                             name={item.name}  

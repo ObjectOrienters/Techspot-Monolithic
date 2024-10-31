@@ -185,6 +185,7 @@ export default function CommentForm({content}) {
                     direction={['row']}>
 
                     <Input
+                        id='comment-field' //new 
                         w={'75%'}
                         placeholder="Write a comment..."
                         _placeholder={{color: 'gray.500'}}
@@ -194,6 +195,7 @@ export default function CommentForm({content}) {
                     />
 
                     <Button
+                        id='submit-button' //new
                         bg={'blue.400'}
                         color={'white'}
                         w="25%"
